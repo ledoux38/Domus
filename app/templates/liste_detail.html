@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Liste : 
+    <form method="POST" style="display:inline;">
+        <input type="text" name="nom" value="{{ liste.nom }}" style="width:200px;">
+        <button type="submit">Renommer</button>
+    </form>
+</h2>
+
+<!-- Ajouter un nouvel item -->
+<form method="POST" action="{{ url_for('main.ajouter_item', liste_id=liste.id) }}">
+    <input type="text" name="texte" placeholder="Nouvel élément" required>
+    <button type="submit">Ajouter</button>
+</form>
+
+<ul>
+    {% for item in items %}
+    <li>
+        <form method="POST" action="{{ url_for('main.toggle_item', liste_id=liste.id, item_id=item.id) }}" style="display:inline;">
+            <button type="submit">{% if item.fait %}✅{% else %}⬜️{% endif %}</button>
+        </form>
+        {{ item.texte }}
+        <form method="POST" action="{{ url_for('main.supprimer_item', liste_id=liste.id, item_id=item.id) }}" style="display:inline;">
+            <button type="submit">🗑️</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+
+<a href="{{ url_for('main.toutes_les_listes') }}">← Retour à mes listes</a>
+{% endblock %}
