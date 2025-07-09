@@ -4,9 +4,11 @@ from app.models import db, Liste, Item
 
 @pytest.fixture
 def client():
-    app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'  # base temporaire
+    test_config = {
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:"
+    }
+    app = create_app(test_config)
     with app.test_client() as client:
         with app.app_context():
             db.create_all()
