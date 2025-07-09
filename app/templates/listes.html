@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Mes listes</h2>
+<form method="POST" action="{{ url_for('main.ajouter_liste') }}">
+    <input type="text" name="nom" placeholder="Nom de la liste" required>
+    <button type="submit">Ajouter</button>
+</form>
+<ul>
+    {% for liste in listes %}
+    <li>
+        <a href="{{ url_for('main.voir_liste', liste_id=liste.id) }}">{{ liste.nom }}</a>
+        <form method="POST" action="{{ url_for('main.supprimer_liste', liste_id=liste.id) }}" style="display:inline">
+            <button type="submit">🗑️</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
