@@ -27,7 +27,8 @@ def ajouter_liste():
 @bp.route('/listes/<int:liste_id>')
 def voir_liste(liste_id):
     liste = Liste.query.get_or_404(liste_id)
-    return render_template('liste_detail.html', liste=liste)
+    items = Item.query.filter_by(liste_id=liste.id).all()
+    return render_template('liste_detail.html', liste=liste, items=items)
 
 
 @bp.route('/listes/<int:liste_id>/supprimer', methods=['POST'])
