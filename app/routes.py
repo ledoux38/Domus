@@ -3,6 +3,7 @@ from .models import db, Task, Item
 
 bp = Blueprint('main', __name__)
 
+
 @bp.route('/')
 def index():
     return render_template('index.html')
@@ -20,6 +21,16 @@ def add_task():
     if name:
         task = Task(name=name)
         db.session.add(task)
+        db.session.commit()
+    return redirect(url_for('main.all_tasks'))
+
+
+@bp.route('/task/rename/<int:task_id>', methods=['PUT'])
+def rename_task(task_id):
+    name = request.form.get('name')
+    task = Task.query.get_or_404(task_id)
+    if name:
+        task.name = name
         db.session.commit()
     return redirect(url_for('main.all_tasks'))
 
