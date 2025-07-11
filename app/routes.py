@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for
-from .models import db, Liste, Item
+from .models import db, Task, Item
 
 bp = Blueprint('main', __name__)
 
@@ -8,58 +8,58 @@ def index():
     return render_template('index.html')
 
 
-@bp.route('/listes')
-def toutes_les_listes():
-    listes = Liste.query.all()
-    return render_template('listes.html', listes=listes)
+@bp.route('/tasks')
+def all_tasks():
+    tasks = Task.query.all()
+    return render_template('tasks.html', tasks=tasks)
 
 
-@bp.route('/listes/nouvelle', methods=['POST'])
-def ajouter_liste():
-    nom = request.form.get('nom')
-    if nom:
-        liste = Liste(nom=nom)
-        db.session.add(liste)
+@bp.route('/task/new', methods=['POST'])
+def add_task():
+    name = request.form.get('name')
+    if name:
+        task = Task(name=name)
+        db.session.add(task)
         db.session.commit()
-    return redirect(url_for('main.toutes_les_listes'))
+    return redirect(url_for('main.all_tasks'))
 
 
-@bp.route('/listes/<int:liste_id>')
-def voir_liste(liste_id):
-    liste = Liste.query.get_or_404(liste_id)
-    items = Item.query.filter_by(liste_id=liste.id).all()
-    return render_template('liste_detail.html', liste=liste, items=items)
+@bp.route('/task/<int:task_id>')
+def get_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    items = Item.query.filter_by(task_id=task.id).all()
+    return render_template('task_detail.html', task=task, items=items)
 
 
-@bp.route('/listes/<int:liste_id>/supprimer', methods=['POST'])
-def supprimer_liste(liste_id):
-    liste = Liste.query.get_or_404(liste_id)
-    db.session.delete(liste)
+@bp.route('/tasks/<int:task_id>/delete', methods=['POST'])
+def delete_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    db.session.delete(task)
     db.session.commit()
-    return redirect(url_for('main.toutes_les_listes'))
+    return redirect(url_for('main.all_tasks'))
 
 
-@bp.route('/listes/<int:liste_id>/ajouter_item', methods=['POST'])
-def ajouter_item(liste_id):
-    texte = request.form.get('texte')
-    if texte:
-        item = Item(texte=texte, liste_id=liste_id)
+@bp.route('/tasks/<int:task_id>/add_item', methods=['POST'])
+def add_item(task_id):
+    text = request.form.get('text')
+    if text:
+        item = Item(text=text, task_id=task_id)
         db.session.add(item)
         db.session.commit()
-    return redirect(url_for('main.voir_liste', liste_id=liste_id))
+    return redirect(url_for('main.get_task', task_id=task_id))
 
 
-@bp.route('/listes/<int:liste_id>/item/<int:item_id>/toggle', methods=['POST'])
-def toggle_item(liste_id, item_id):
+@bp.route('/tasks/<int:task_id>/item/<int:item_id>/toggle', methods=['POST'])
+def toggle_item(task_id, item_id):
     item = Item.query.get_or_404(item_id)
-    item.fait = not item.fait
+    item.done = not item.done
     db.session.commit()
-    return redirect(url_for('main.voir_liste', liste_id=liste_id))
+    return redirect(url_for('main.get_task', task_id=task_id))
 
 
-@bp.route('/listes/<int:liste_id>/item/<int:item_id>/supprimer', methods=['POST'])
-def supprimer_item(liste_id, item_id):
+@bp.route('/tasks/<int:task_id>/item/<int:item_id>/delete', methods=['POST'])
+def delete_item(task_id, item_id):
     item = Item.query.get_or_404(item_id)
     db.session.delete(item)
     db.session.commit()
-    return redirect(url_for('main.voir_liste', liste_id=liste_id))
+    return redirect(url_for('main.get_task', task_id=task_id))
