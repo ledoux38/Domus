@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Mes listes</h2>
-<form method="POST" action="{{ url_for('main.add_task') }}">
+<form method="POST" action="{{ url_for('main.add_list') }}">
     <input type="text" name="name" placeholder="Nom de la liste" required>
     <button type="submit">Ajouter</button>
 </form>
 <ul>
-    {% for task in tasks %}
+    {% for list in lists %}
     <li>
-        <a href="{{ url_for('main.get_task', task_id=task.id) }}">{{ task.name }}</a>
-        <form method="POST" action="{{ url_for('main.delete_task', task_id=task.id) }}" style="display:inline">
+        <a href="{{ url_for('main.get_list', list_id=list.id) }}">{{ list.name }}</a>
+        <form method="POST" action="{{ url_for('main.delete_list', list_id=list.id) }}" style="display:inline">
             <button type="submit">🗑️</button>
         </form>
     </li>

@@ -2,13 +2,13 @@
 {% block content %}
 <h2>Task :
     <form method="POST" style="display:inline;">
-        <input type="text" name="name" value="{{ task.name }}" style="width:200px;">
+        <input type="text" name="name" value="{{ list.name }}" style="width:200px;">
         <button type="submit">Renommer</button>
     </form>
 </h2>
 
 <!-- Ajouter un nouvel item -->
-<form method="POST" action="{{ url_for('main.add_item', task_id=task.id) }}">
+<form method="POST" action="{{ url_for('main.add_item', list_id=list.id) }}">
     <input type="text" name="text" placeholder="Nouvel élément" required>
     <button type="submit">Ajouter</button>
 </form>
@@ -17,15 +17,15 @@
     {% for item in items %}
     <li>
         {{ item.text }}
-        <form method="POST" action="{{ url_for('main.toggle_item', task_id=task.id, item_id=item.id) }}" style="display:inline;">
+        <form method="POST" action="{{ url_for('main.toggle_item', list_id=list.id, item_id=item.id) }}" style="display:inline;">
             <button type="submit">{% if item.done %}✅{% else %}⬜️{% endif %}</button>
         </form>
-        <form method="POST" action="{{ url_for('main.delete_item', task_id=task.id, item_id=item.id) }}" style="display:inline;">
+        <form method="POST" action="{{ url_for('main.delete_item', list_id=list.id, item_id=item.id) }}" style="display:inline;">
             <button type="submit">🗑️</button>
         </form>
     </li>
     {% endfor %}
 </ul>
 
-<a href="{{ url_for('main.all_tasks') }}">← Retour à mes listes</a>
+<a href="{{ url_for('main.all_lists') }}">← Retour à mes listes</a>
 {% endblock %}
