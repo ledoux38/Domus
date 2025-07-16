@@ -1,66 +1,44 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>
-    Liste : {{ list.name }} <small>[{{ list.tag }}]</small>
-    <!-- (Optionnel) formulaire de renommage -->
-    <!--
-    <form method="POST" style="display:inline;">
-        <input type="text" name="name" value="{{ list.name }}" style="width:200px;">
-        <button type="submit">Renommer</button>
+    <h2>
+        Liste : {{ list.name }} <small>[{{ list.tag }}]</small>
+        <!-- (Optionnel) formulaire de renommage -->
+        <!--
+        <form method="POST" style="display:inline;">
+            <input type="text" name="name" value="{{ list.name }}" style="width:200px;">
+            <button type="submit">Renommer</button>
+        </form>
+        -->
+    </h2>
+
+    <!-- Ajouter un nouvel item -->
+    <form id="add-item-form" method="POST" action="{{ url_for('main.add_item', list_id=list.id) }}">
+        <input type="text" name="text" id="item-input" autocomplete="off" placeholder="Nouvel élément" required>
+        <button type="submit">Ajouter</button>
+        <div id="suggestions"></div>
     </form>
-    -->
-</h2>
+    <ul>
+        {% for item in items %}
+        <li>
+            {{ item.suggestion.text }} <strong>x{{ item.quantity }}</strong>
+            <form method="POST" action="{{ url_for('main.toggle_item', list_id=list.id, item_id=item.id) }}"
+                  style="display:inline;">
+                <button type="submit">{% if item.done %}✅{% else %}⬜️{% endif %}</button>
+            </form>
+            <form method="POST" action="{{ url_for('main.delete_item', list_id=list.id, item_id=item.id) }}"
+                  style="display:inline;">
+                <button type="submit">🗑️</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
 
-<!-- Ajouter un nouvel item -->
-<form id="add-item-form" method="POST" action="{{ url_for('main.add_item', list_id=list.id) }}">
-    <input type="text" name="text" id="item-input" autocomplete="off" placeholder="Nouvel élément" required>
-    <button type="submit">Ajouter</button>
-    <div id="suggestions"></div>
-</form>
-<ul>
-    {% for item in items %}
-    <li>
-        {{ item.suggestion.text }} <strong>x{{ item.quantity }}</strong>
-        <form method="POST" action="{{ url_for('main.toggle_item', list_id=list.id, item_id=item.id) }}" style="display:inline;">
-            <button type="submit">{% if item.done %}✅{% else %}⬜️{% endif %}</button>
-        </form>
-        <form method="POST" action="{{ url_for('main.delete_item', list_id=list.id, item_id=item.id) }}" style="display:inline;">
-            <button type="submit">🗑️</button>
-        </form>
-    </li>
-    {% endfor %}
-</ul>
-
-<a href="{{ url_for('main.all_lists') }}">← Retour à mes listes</a>
-
-<script>
-    let debounceTimeout = null;
-    const input = document.getElementById('item-input');
-    const suggestionsDiv = document.getElementById('suggestions');
-    const listId = {{ list.id }};  // Passe l'id de la liste depuis le template
-
-    input.addEventListener('input', function() {
-        const value = input.value.trim();
-        suggestionsDiv.innerHTML = '';
-        if (value.length < 3) return; // minimum 3 caractères
-
-        if (debounceTimeout) clearTimeout(debounceTimeout);
-
-        debounceTimeout = setTimeout(() => {
-            fetch(`/lists/${listId}/suggestions?q=${encodeURIComponent(value)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.suggestions.length > 0) {
-                        suggestionsDiv.innerHTML = '<ul style="border:1px solid #ccc; background:#fff; margin-top:2px; padding:5px;">' +
-                            data.suggestions.map(s =>
-                                `<li style="cursor:pointer;" onclick="document.getElementById('item-input').value='${s.replace(/'/g,"\\'")}';document.getElementById('suggestions').innerHTML=''">${s}</li>`
-                            ).join('') +
-                            '</ul>';
-                    }
-                });
-        }, 300);
-    });
-</script>
-
-
+    <a href="{{ url_for('main.all_lists') }}">← Retour à mes listes</a>
+{% endblock %}
+{% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            debouncer_item({{ list.id }});
+        });
+    </script>
 {% endblock %}
