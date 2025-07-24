@@ -3,7 +3,7 @@
 <h2>Mes listes</h2>
 <form method="POST" action="{{ url_for('main.add_list') }}">
     <input type="text" name="name" placeholder="Nom de la liste" required>
-    <input type="text" name="tag" placeholder="Tag (ex : groceries)" required>
+    <input type="text" name="tags" placeholder="Tags (ex : groceries,été,bio)" required>
     <div id="tag-suggestions"></div>
     <button type="submit">Ajouter</button>
 </form>
@@ -11,7 +11,14 @@
     {% for list in lists %}
     <li>
         <a href="{{ url_for('main.get_list', list_id=list.id) }}">
-            {{ list.name }} <small>[{{ list.tag }}]</small>
+            {{ list.name }}
+            <small>
+                [
+                {% for tag in list.tags %}
+                    {{ tag.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                ]
+            </small>
         </a>
         <form method="POST" action="{{ url_for('main.delete_list', list_id=list.id) }}" style="display:inline">
             <button type="submit">🗑️</button>
