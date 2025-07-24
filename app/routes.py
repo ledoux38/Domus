@@ -78,20 +78,26 @@ def add_item(list_id):
     list_ = List.query.get_or_404(list_id)
     if not text:
         return redirect(url_for('main.get_list', list_id=list_id))
-    # Récupère tous les tags de la liste
     list_tags = list_.tags or [Tag.query.filter_by(name='indefinie').first()]
-    # Recherche une suggestion existante avec ce texte ET au moins un des tags de la liste
+    # On cherche une suggestion existante avec ce texte et au moins un des tags
     suggestion = Suggestion.query.filter(
         Suggestion.text.ilike(text)
     ).filter(
         Suggestion.tags.any(Tag.id.in_([t.id for t in list_tags]))
     ).first()
     if not suggestion:
+        # Si la suggestion n’existe pas, on la crée
         suggestion = Suggestion(text=text)
         suggestion.tags = list_tags
         db.session.add(suggestion)
         db.session.commit()
-    # Cherche si déjà dans la liste (association existante)
+    else:
+        # ICI : enrichir dynamiquement les tags de la suggestion
+        for t in list_tags:
+            if t not in suggestion.tags:
+                suggestion.tags.append(t)
+        db.session.commit()
+    # ... (suite inchangée)
     item = Item.query.filter_by(list_id=list_id, suggestion_id=suggestion.id).first()
     if item:
         item.quantity += 1
