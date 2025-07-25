@@ -55,15 +55,6 @@ def rename_list(list_id):
     return redirect(url_for('main.all_lists'))
 
 
-
-@bp.route('/list/<int:list_id>')
-def get_list(list_id):
-    list_ = List.query.get_or_404(list_id)
-    items = Item.query.filter_by(list_id=list_.id).all()
-    return render_template('list_detail.html', list=list_, items=items)
-
-
-
 @bp.route('/lists/<int:list_id>/delete', methods=['POST'])
 def delete_list(list_id):
     list_ = List.query.get_or_404(list_id)
@@ -153,3 +144,39 @@ def tag_suggestions():
     q = request.args.get('q', '')
     tags = Tag.query.filter(Tag.name.ilike(f'%{q}%')).limit(5).all()
     return jsonify({'suggestions': [t.name for t in tags]})
+
+@bp.route('/lists/<int:list_id>/quick_suggestions')
+def quick_suggestions(list_id):
+    tag_ids = request.args.getlist('tag_ids', type=int)  # list of active tag ids
+    list_ = List.query.get_or_404(list_id)
+    # Récupère tous les items déjà dans la liste
+    present_texts = {item.suggestion.text for item in list_.items}
+    suggestions = Suggestion.query.filter(
+        Suggestion.tags.any(Tag.id.in_(tag_ids)),
+    ).limit(10).all()
+    return jsonify({'suggestions': [ {'text': s.text} for s in suggestions ]})
+
+def serialize_item(item):
+    return {
+        "id": item.id,
+        "quantity": item.quantity,
+        "done": item.done,
+        "suggestion": {
+            "text": item.suggestion.text
+        }
+    }
+
+@bp.route('/list/<int:list_id>')
+def get_list(list_id):
+    list_ = List.query.get_or_404(list_id)
+    items = Item.query.filter_by(list_id=list_.id).all()
+    all_tags = Tag.query.all()
+    active_tag_ids = [tag.id for tag in list_.tags]
+    # Nouvelle ligne : version serializable des items pour le JS
+    items_json = [serialize_item(item) for item in items]
+    return render_template('list_detail.html',
+                          list=list_,
+                          items=items,
+                          items_json=items_json,
+                          all_tags=all_tags,
+                          active_tag_ids=active_tag_ids)
