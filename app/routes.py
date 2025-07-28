@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, make_response
 
 from .models import db, List, Suggestion, Item, Tag
 
@@ -60,7 +60,9 @@ def delete_list(list_id):
     list_ = List.query.get_or_404(list_id)
     db.session.delete(list_)
     db.session.commit()
-    return redirect(url_for('main.all_lists'))
+
+    # Pour HTMX : on retourne une réponse vide avec 204 No Content
+    return ""
 
 
 @bp.route('/lists/<int:list_id>/add_item', methods=['POST'])
@@ -83,7 +85,7 @@ def add_item(list_id):
         db.session.add(suggestion)
         db.session.commit()
     else:
-        # ICI : enrichir dynamiquement les tags de la suggestion
+        # ICI: enrichir dynamiquement les tags de la suggestion
         for t in list_tags:
             if t not in suggestion.tags:
                 suggestion.tags.append(t)
@@ -147,14 +149,22 @@ def tag_suggestions():
 
 @bp.route('/lists/<int:list_id>/quick_suggestions')
 def quick_suggestions(list_id):
-    tag_ids = request.args.getlist('tag_ids', type=int)  # list of active tag ids
+    tag_ids = request.args.getlist('tag_ids', type=int)
     list_ = List.query.get_or_404(list_id)
-    # Récupère tous les items déjà dans la liste
-    present_texts = {item.suggestion.text for item in list_.items}
+    items = Item.query.filter_by(list_id=list_id).all()
     suggestions = Suggestion.query.filter(
-        Suggestion.tags.any(Tag.id.in_(tag_ids)),
+        Suggestion.tags.any(Tag.id.in_(tag_ids))
     ).limit(10).all()
-    return jsonify({'suggestions': [ {'text': s.text} for s in suggestions ]})
+
+    # Si c’est une requête HTMX, retourne du HTML
+    if request.headers.get('HX-Request') == 'true':
+        return render_template('fragments/quick_suggestions.html',
+                               suggestions=suggestions,
+                               items=items,
+                               list=list_)
+    else:
+        # JSON fallback si jamais utilisé ailleurs
+        return jsonify({'suggestions': [ {'text': s.text} for s in suggestions ]})
 
 def serialize_item(item):
     return {

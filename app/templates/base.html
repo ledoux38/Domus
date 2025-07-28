@@ -10,8 +10,13 @@
         {% block content %}
         {% endblock %}
     </div>
-    <script src="{{ url_for('static', filename='debouncer_item.js') }}"></script>
-    <script src="{{ url_for('static', filename='debouncer_tag.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/itemInput.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tagInput.js') }}"></script>
+
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x"></script>
+
     {% block scripts %}{% endblock %}
 </body>
 </html>

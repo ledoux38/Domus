@@ -1,62 +1,88 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>
-        Liste : {{ list.name }}
-        <small>
-            [
-            {% for tag in list.tags %}
-                {{ tag.name }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-            ]
-        </small>
-    </h2>
-
-    <!-- Ajouter un nouvel item -->
-    <form id="add-item-form" method="POST" action="{{ url_for('main.add_item', list_id=list.id) }}">
-        <input type="text" name="text" id="item-input" autocomplete="off" placeholder="Nouvel élément" required>
-        <button type="submit">Ajouter</button>
-        <div id="suggestions"></div>
-    </form>
-    <ul>
-        {% for item in items %}
-        <li>
-            {{ item.suggestion.text }} <strong>x{{ item.quantity }}</strong>
-            <form method="POST" action="{{ url_for('main.toggle_item', list_id=list.id, item_id=item.id) }}"
-                  style="display:inline;">
-                <button type="submit">{% if item.done %}✅{% else %}⬜️{% endif %}</button>
-            </form>
-            <form method="POST" action="{{ url_for('main.delete_item', list_id=list.id, item_id=item.id) }}"
-                  style="display:inline;">
-                <button type="submit">🗑️</button>
-            </form>
-        </li>
+<h2>
+    Liste : {{ list.name }}
+    <small>
+        [
+        {% for tag in list.tags %}
+        {{ tag.name }}{% if not loop.last %}, {% endif %}
         {% endfor %}
-    </ul>
+        ]
+    </small>
+</h2>
 
-    <div>
-        <strong>Tags : </strong>
-        {% for tag in all_tags %}
-            <button
-                class="tag-btn {% if tag.id in active_tag_ids %}active{% endif %}"
-                data-tag-id="{{ tag.id }}">
-                {{ tag.name }}
-            </button>
-        {% endfor %}
+<form method="POST"
+      action="{{ url_for('main.add_item', list_id=list.id) }}"
+      x-data="itemInput({{ list.id }})">
+
+    <input type="text"
+           name="text"
+           x-model="input"
+           @input="debounceFetch"
+           autocomplete="off"
+           placeholder="Nouvel élément"
+           required>
+
+    <div id="suggestions">
+        <template x-if="suggestions.length > 0">
+            <ul style="border:1px solid #ccc; background:#fff; margin-top:2px; padding:5px;">
+                <template x-for="s in suggestions" :key="s">
+                    <li style="cursor:pointer;"
+                        @click="selectSuggestion(s)"
+                        x-text="s"></li>
+                </template>
+            </ul>
+        </template>
     </div>
 
-    <div id="suggestions-quick-add">
-        <strong>Suggestions:</strong>
-        <ul></ul>
-    </div>
+    <button type="submit">Ajouter</button>
+</form>
+<ul>
+    {% for item in items %}
+    <li>
+        {{ item.suggestion.text }} <strong>x{{ item.quantity }}</strong>
+        <form method="POST" action="{{ url_for('main.toggle_item', list_id=list.id, item_id=item.id) }}"
+              style="display:inline;">
+            <button type="submit">{% if item.done %}✅{% else %}⬜️{% endif %}</button>
+        </form>
+        <form method="POST" action="{{ url_for('main.delete_item', list_id=list.id, item_id=item.id) }}"
+              style="display:inline;">
+            <button type="submit">🗑️</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
 
-    <a href="{{ url_for('main.all_lists') }}">← Retour à mes listes</a>
+<div>
+    <strong>Tags : </strong>
+    {% for tag in all_tags %}
+        <button
+            x-data
+            @click="$el.classList.toggle('active'); refreshSuggestionsHTMX()"
+            data-tag-id="{{ tag.id }}"
+            class="tag-btn {% if tag.id in active_tag_ids %}active{% endif %}">
+            {{ tag.name }}
+        </button>
+    {% endfor %}
+</div>
+
+<div id="suggestions-quick-add"
+     hx-get="{{ url_for('main.quick_suggestions', list_id=list.id) }}?{{ active_tag_ids | map('string') | join('&tag_ids=') }}"
+     hx-trigger="load, refresh from:body"
+     hx-target="#suggestions-quick-add"
+     hx-swap="outerHTML">
+</div>
+
+<a href="{{ url_for('main.all_lists') }}">← Retour à mes listes</a>
 {% endblock %}
 {% block scripts %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            debouncer_item({{ list.id }});
-            refreshQuickSuggestions();
-    });
-});
+<script>
+    function refreshSuggestionsHTMX() {
+        const activeIds = [...document.querySelectorAll('.tag-btn.active')]
+            .map(btn => `tag_ids=${btn.dataset.tagId}`).join('&');
+        document.querySelector('#suggestions-quick-add')
+            .setAttribute('hx-get', `/lists/{{ list.id }}/quick_suggestions?${activeIds}`);
+        htmx.trigger('#suggestions-quick-add', 'refresh'); // ou 'load'
+    }
 </script>
 {% endblock %}

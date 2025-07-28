@@ -1,0 +1,17 @@
+<div id="suggestions-quick-add">
+    <strong>Suggestions:</strong>
+    <ul>
+        {% for s in suggestions %}
+        <li>
+            {{ s.text }}
+            <form method="POST" action="{{ url_for('main.add_item', list_id=list.id) }}" style="display:inline">
+                <input type="hidden" name="text" value="{{ s.text }}">
+                <button type="submit">
+                    {% set present = items | selectattr("suggestion.text", "equalto", s.text) | list %}
+                    {% if present %}+ (x{{ present[0].quantity }}){% else %}+{% endif %}
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

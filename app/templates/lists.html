@@ -3,35 +3,51 @@
 <h2>Mes listes</h2>
 <form method="POST" action="{{ url_for('main.add_list') }}">
     <input type="text" name="name" placeholder="Nom de la liste" required>
-    <input type="text" name="tags" placeholder="Tags (ex : groceries,été,bio)" required>
-    <div id="tag-suggestions"></div>
+<div x-data="tagInput()">
+    <input type="text"
+           name="tags"
+           x-model="input"
+           @input="debounceFetch"
+           autocomplete="off"
+           placeholder="Tags (ex : groceries,été,bio)"
+           required>
+
+    <template x-if="suggestions.length > 0">
+        <ul style="border:1px solid #ccc; background:#fff; margin-top:2px; padding:5px;">
+            <template x-for="s in suggestions" :key="s">
+                <li @click="select(s)"
+                    x-text="s"
+                    style="cursor:pointer;"></li>
+            </template>
+        </ul>
+    </template>
+</div>
+
     <button type="submit">Ajouter</button>
 </form>
 <ul>
     {% for list in lists %}
-    <li>
-        <a href="{{ url_for('main.get_list', list_id=list.id) }}">
-            {{ list.name }}
-            <small>
-                [
-                {% for tag in list.tags %}
-                    {{ tag.name }}{% if not loop.last %}, {% endif %}
-                {% endfor %}
-                ]
-            </small>
-        </a>
-        <form method="POST" action="{{ url_for('main.delete_list', list_id=list.id) }}" style="display:inline">
-            <button type="submit">🗑️</button>
-        </form>
-    </li>
+        <li>
+            <a href="{{ url_for('main.get_list', list_id=list.id) }}">
+                {{ list.name }}
+                <small>
+                    [
+                    {% for tag in list.tags %}
+                        {{ tag.name }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    ]
+                </small>
+            </a>
+            <button
+                hx-post="{{ url_for('main.delete_list', list_id=list.id) }}"
+                hx-target="closest li"
+                hx-swap="outerHTML"
+                hx-confirm="Supprimer cette liste ?"
+                style="display:inline">
+                🗑️
+            </button>
+        </li>
     {% endfor %}
 </ul>
 {% endblock %}
-    {% block scripts %}
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            debouncer_tag();
-        });
-        </script>
-
-{% endblock %}
+{% block scripts %}{% endblock %}
