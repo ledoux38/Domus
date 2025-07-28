@@ -55,49 +55,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             debouncer_item({{ list.id }});
-// --- Système de suggestions rapides par tags actifs ---
-    // On suppose que les boutons tags sont déjà là dans ton template
-    let activeTagIds = [...document.querySelectorAll('.tag-btn.active')].map(btn => btn.dataset.tagId);
-
-    function refreshQuickSuggestions() {
-        fetch(`/lists/{{ list.id }}/quick_suggestions?` + activeTagIds.map(id => `tag_ids=${id}`).join('&'))
-            .then(res => res.json())
-            .then(data => {
-                const items = {{ items_json|tojson }};
-                const ul = document.querySelector('#suggestions-quick-add ul');
-                ul.innerHTML = '';
-                data.suggestions.forEach(s => {
-                    // Cherche si déjà présent dans la liste
-                    const presentItem = items.find(item => item.suggestion.text === s.text);
-                    let form = document.createElement('form');
-                    form.method = "POST";
-                    form.action = "{{ url_for('main.add_item', list_id=list.id) }}";
-                    form.style.display = "inline";
-                    form.innerHTML = `
-                        <input type="hidden" name="text" value="${s.text}">
-                        <button type="submit">
-                            ${presentItem ? `+ (x${presentItem.quantity})` : `+`}
-                        </button>
-                    `;
-                    let li = document.createElement('li');
-                    li.innerHTML = s.text + " ";
-                    li.appendChild(form);
-                    ul.appendChild(li);
-                });
-            });
-    }
-
-    // Rafraîchit au chargement
-    refreshQuickSuggestions();
-
-    // Ajout du comportement pour activer/désactiver les tags dynamiquement
-    document.querySelectorAll('.tag-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.classList.toggle('active');
-            // Reconstruit la liste des tags actifs
-            activeTagIds = [...document.querySelectorAll('.tag-btn.active')].map(b => b.dataset.tagId);
             refreshQuickSuggestions();
-        });
     });
 });
 </script>
