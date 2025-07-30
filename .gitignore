@@ -1,0 +1,24 @@
+# Python / Flask
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+.venv/
+venv/
+instance/
+*.sqlite3
+domus.db
+
+# VSCode
+.vscode/
+
+# Angular / Node
+domus-frontend/node_modules/
+domus-frontend/dist/
+domus-frontend/.angular/
+domus-frontend/.env
+
+# macOS/Linux
+.DS_Store
+*.swp
