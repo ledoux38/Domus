@@ -1,36 +1,8 @@
 from flask import Blueprint, request, jsonify
-from .models import db, List, Suggestion, Item
+from .models import db, List, Suggestion, Item, Tag
+from .utils import serialize_list, serialize_item, get_or_create_tags, serialize_suggestion
 
 bp = Blueprint('main', __name__)
-
-# ------------------ UTILS ------------------
-
-def serialize_list(lst):
-    return {
-        "id": lst.id,
-        "name": lst.name,
-        "tag": lst.tag,
-        "creation_date": lst.creation_date.isoformat()
-    }
-
-def serialize_item(item):
-    return {
-        "id": item.id,
-        "quantity": item.quantity,
-        "done": item.done,
-        "suggestion": {
-            "id": item.suggestion.id,
-            "text": item.suggestion.text,
-            "tag": item.suggestion.tag
-        }
-    }
-
-def serialize_suggestion(suggestion):
-    return {
-        "id": suggestion.id,
-        "text": suggestion.text,
-        "tag": suggestion.tag
-    }
 
 # ------------------ ROUTES API JSON ------------------
 
@@ -52,10 +24,12 @@ def api_get_list(list_id):
 def api_add_list():
     data = request.get_json()
     name = data.get('name')
-    tag = data.get('tag', 'indefinie')
+    tag_string = data.get('tag', '')
     if not name:
         return jsonify({'error': 'Missing name'}), 400
-    lst = List(name=name, tag=tag)
+    tag_objs = get_or_create_tags(tag_string)
+    lst = List(name=name)
+    lst.tags = tag_objs
     db.session.add(lst)
     db.session.commit()
     return jsonify(serialize_list(lst)), 201

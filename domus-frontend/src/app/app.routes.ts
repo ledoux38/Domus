@@ -10,5 +10,6 @@ export const routes: Routes = [
   { path: 'annuaire', component: Annuaire },
   { path: 'listes', component: Listes },
   { path: 'temperature', component: Temperature },
-  { path: '', redirectTo: '/agenda', pathMatch: 'full' }
+  { path: '', redirectTo: '/listes', pathMatch: 'full' },
+  { path: '**', redirectTo: '/listes' }
 ];

@@ -1,1 +1,23 @@
-<p>listes works!</p>
+<h2>Mes listes</h2>
+<form #addForm="ngForm" (submit)="addList(addForm); $event.preventDefault()">
+  <input type="text" [(ngModel)]="newName" name="name" placeholder="Nom de la liste">
+  <input type="text" [(ngModel)]="newTag" name="tag" placeholder="Tag (ex: course, été)">
+  <button type="submit">Ajouter</button>
+</form>
+
+<ul>
+  @for (list of lists; track list.id) {
+    <li>
+      <span>{{list.name}}
+        <small>
+          [{{list.tags}}]
+        </small>
+      </span>
+<!--      <button (click)="deleteList(list.id)">Supprimer</button>-->
+      <a [routerLink]="['/lists', list.id]">Voir</a>
+    </li>
+  } @empty {<li>There are no items.</li>}
+
+
+
+</ul>

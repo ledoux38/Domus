@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_cors import CORS
+
 from .models import db
 
 def create_app(test_config=None):
@@ -10,7 +12,7 @@ def create_app(test_config=None):
     # Si une config test est fournie, on l’utilise
     if test_config:
         app.config.update(test_config)
-
+    CORS(app)
     db.init_app(app)
     with app.app_context():
         db.create_all()
