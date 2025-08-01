@@ -1,0 +1,5 @@
+<form #addForm="ngForm" (submit)="addList(addForm);">
+  <input type="text" [(ngModel)]="newName" name="name" placeholder="Nom de la liste">
+  <input type="text" [(ngModel)]="newTag" name="tag" placeholder="Tag (ex: course, été)">
+  <button type="submit">Ajouter</button>
+</form>

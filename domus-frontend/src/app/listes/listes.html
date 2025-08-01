@@ -1,10 +1,5 @@
 <h2>Mes listes</h2>
-<form #addForm="ngForm" (submit)="addList(addForm); $event.preventDefault()">
-  <input type="text" [(ngModel)]="newName" name="name" placeholder="Nom de la liste">
-  <input type="text" [(ngModel)]="newTag" name="tag" placeholder="Tag (ex: course, été)">
-  <button type="submit">Ajouter</button>
-</form>
-
+<app-add-list-form (add)="addList($event)"></app-add-list-form>
 <ul>
   @for (list of lists; track list.id) {
     <app-list-card [list]="list"></app-list-card>

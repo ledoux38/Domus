@@ -3,12 +3,14 @@ import {List, ListService} from '../core/services/listService';
 import {FormsModule, NgForm} from '@angular/forms';
 import {ChangeDetectorRef} from '@angular/core';
 import {ListCard} from './list-card/list-card';
+import {AddListForm} from './add-list-form/add-list-form';
 
 @Component({
   selector: 'app-listes',
   imports: [
     FormsModule,
-    ListCard
+    ListCard,
+    AddListForm
   ],
   templateUrl: './listes.html',
   standalone: true,
@@ -16,8 +18,6 @@ import {ListCard} from './list-card/list-card';
 })
 export class Listes implements OnInit {
   lists: ListCard[] = [];
-  newName: string = '';
-  newTag: string = '';
 
   constructor(private listService: ListService, private cdr: ChangeDetectorRef) {
   }
@@ -26,27 +26,18 @@ export class Listes implements OnInit {
     this.loadLists();
   }
 
+  addList({name, tag}: { name: string, tag: string }) {
+    this.listService.addList(name, tag).subscribe(() => {
+      this.loadLists();
+    });
+  }
+
   loadLists(): void {
     this.listService.getLists().subscribe(lists => {
       this.lists = [...lists]
       this.cdr.detectChanges();
     });
 
-  }
-
-  addList(form: NgForm) {
-    if (this.newName.trim()) {
-      this.listService.addList(this.newName, this.newTag || 'indefinie').subscribe(() => {
-        this.newName = '';
-        this.newTag = '';
-        form.resetForm();
-        this.loadLists();
-      });
-    }
-  }
-
-  trackById(index: number, item: any): number {
-    return item.id;
   }
 
   deleteList(list: List) {
