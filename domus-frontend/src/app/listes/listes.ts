@@ -1,20 +1,21 @@
 import {Component, OnInit} from '@angular/core';
 import {List, ListService} from '../core/services/listService';
 import {FormsModule, NgForm} from '@angular/forms';
-import {RouterLink} from '@angular/router';
-import { ChangeDetectorRef } from '@angular/core';
+import {ChangeDetectorRef} from '@angular/core';
+import {ListCard} from './list-card/list-card';
+
 @Component({
   selector: 'app-listes',
   imports: [
     FormsModule,
-    RouterLink
+    ListCard
   ],
   templateUrl: './listes.html',
   standalone: true,
   styleUrl: './listes.css'
 })
 export class Listes implements OnInit {
-  lists: List[] = [];
+  lists: ListCard[] = [];
   newName: string = '';
   newTag: string = '';
 

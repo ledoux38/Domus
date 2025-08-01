@@ -1,0 +1,9 @@
+<li>
+  <span>
+    {{list.name}}
+    <small>
+      [{{list.tags.join(', ') || 'Aucun tag'}}]
+    </small>
+  </span>
+  <a [routerLink]="['/lists', list.id]">Voir</a>
+</li>

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {ListCard} from '../../listes/list-card/list-card';
 
 export interface List {
   id:number;
@@ -17,8 +18,8 @@ export class ListService {
   constructor(private http: HttpClient) {
   }
 
-  getLists(): Observable<List[]> {
-    return this.http.get<List[]>(this.apiUrl);
+  getLists(): Observable<ListCard[]> {
+    return this.http.get<ListCard[]>(this.apiUrl);
   }
 
   addList(name: string, tag: string): Observable<List> {

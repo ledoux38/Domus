@@ -7,17 +7,10 @@
 
 <ul>
   @for (list of lists; track list.id) {
-    <li>
-      <span>{{list.name}}
-        <small>
-          [{{list.tags}}]
-        </small>
-      </span>
-<!--      <button (click)="deleteList(list.id)">Supprimer</button>-->
-      <a [routerLink]="['/lists', list.id]">Voir</a>
-    </li>
-  } @empty {<li>There are no items.</li>}
+    <app-list-card [list]="list"></app-list-card>
+  }
 
-
-
+  @if (lists.length === 0) {
+    <li>Aucune liste pour le moment.</li>
+  }
 </ul>
