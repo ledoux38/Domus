@@ -2,7 +2,7 @@
 <app-add-list-form (add)="addList($event)"></app-add-list-form>
 <ul>
   @for (list of lists; track list.id) {
-    <app-list-card [list]="list"></app-list-card>
+    <app-list-card (delete)="deleteList($event)" [list]="list"></app-list-card>
   }
 
   @if (lists.length === 0) {

@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {RouterLink} from '@angular/router';
 
 export interface ListCard {
@@ -18,4 +18,9 @@ export interface ListCard {
 })
 export class ListCard {
   @Input() list!: ListCard;
+  @Output() delete = new EventEmitter<{ id: number }>();
+
+  deleteCard(id: number) {
+    this.delete.emit({id});
+  }
 }

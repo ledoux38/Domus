@@ -40,9 +40,9 @@ export class Listes implements OnInit {
 
   }
 
-  deleteList(list: List) {
-    if (confirm(`supprimer la liste "${list.name}" ?`)) {
-      this.listService.deleteList(list.id).subscribe(() => {
+  deleteList({id}: { id: number }) {
+    if (confirm(`supprimer la liste ?`)) {
+      this.listService.deleteList(id).subscribe(() => {
         this.loadLists();
       });
     }
