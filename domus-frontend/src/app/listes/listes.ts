@@ -1,23 +1,24 @@
 import {Component, OnInit} from '@angular/core';
-import {List, ListService} from '../core/services/listService';
-import {FormsModule, NgForm} from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 import {ChangeDetectorRef} from '@angular/core';
-import {ListCard} from './list-card/list-card';
 import {AddListForm} from './add-list-form/add-list-form';
+import {ListService} from '../core/services/list-service';
+import {List} from '../models/interfaces';
+import {ListCard} from './list-card/list-card';
 
 @Component({
   selector: 'app-listes',
   imports: [
     FormsModule,
-    ListCard,
-    AddListForm
+    AddListForm,
+    ListCard
   ],
   templateUrl: './listes.html',
   standalone: true,
   styleUrl: './listes.css'
 })
 export class Listes implements OnInit {
-  lists: ListCard[] = [];
+  lists: List[] = [];
 
   constructor(private listService: ListService, private cdr: ChangeDetectorRef) {
   }

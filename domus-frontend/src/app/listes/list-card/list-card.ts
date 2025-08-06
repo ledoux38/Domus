@@ -1,11 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {RouterLink} from '@angular/router';
+import {List} from '../../models/interfaces';
 
-export interface ListCard {
-  id: number;
-  name: string;
-  tags: string[];
-}
 
 @Component({
   selector: 'app-list-card',
@@ -17,7 +13,7 @@ export interface ListCard {
   styleUrl: './list-card.css'
 })
 export class ListCard {
-  @Input() list!: ListCard;
+  @Input() list!: List;
   @Output() delete = new EventEmitter<{ id: number }>();
 
   deleteCard(id: number) {

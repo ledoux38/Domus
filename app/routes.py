@@ -14,11 +14,13 @@ def api_get_lists():
 @bp.route('/api/lists/<int:list_id>', methods=['GET'])
 def api_get_list(list_id):
     lst = List.query.get_or_404(list_id)
+    return jsonify(serialize_list(lst))
+
+@bp.route('/api/lists/<int:list_id>/items', methods=['GET'])
+def api_get_items(list_id):
+    lst = List.query.get_or_404(list_id)
     items = Item.query.filter_by(list_id=lst.id).all()
-    return jsonify({
-        "list": serialize_list(lst),
-        "items": [serialize_item(i) for i in items]
-    })
+    return jsonify([serialize_item(i) for i in items])
 
 @bp.route('/api/lists', methods=['POST'])
 def api_add_list():
@@ -82,15 +84,15 @@ def api_add_item(list_id):
     db.session.commit()
     return jsonify(serialize_item(item)), 201
 
-@bp.route('/api/lists/<int:list_id>/items/<int:item_id>/toggle', methods=['PATCH'])
-def api_toggle_item(list_id, item_id):
+@bp.route('/api/lists/items/<int:item_id>/toggle', methods=['PATCH'])
+def api_toggle_item(item_id):
     item = Item.query.get_or_404(item_id)
     item.done = not item.done
     db.session.commit()
     return jsonify(serialize_item(item))
 
-@bp.route('/api/lists/<int:list_id>/items/<int:item_id>', methods=['DELETE'])
-def api_delete_item(list_id, item_id):
+@bp.route('/api/lists/items/<int:item_id>', methods=['DELETE'])
+def api_delete_item(item_id):
     item = Item.query.get_or_404(item_id)
     if item.quantity > 1:
         item.quantity -= 1

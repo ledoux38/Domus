@@ -26,17 +26,15 @@ def serialize_list(lst):
         "creation_date": lst.creation_date.isoformat()
     }
 
+
 def serialize_item(item):
     return {
         "id": item.id,
         "quantity": item.quantity,
         "done": item.done,
-        "suggestion": {
-            "id": item.suggestion.id,
-            "text": item.suggestion.text,
-            "tag": item.suggestion.tag
-        }
+        "text": item.suggestion.text
     }
+
 
 def serialize_suggestion(suggestion):
     return {

@@ -1,0 +1,12 @@
+@if (list == null) {
+  <p>Chargement des information de la liste...</p>
+} @else {
+  <h2>{{ list.name }}</h2>
+  <small>[{{ list.tags.length ? list.tags.join(',') : 'Aucun tag' }}]</small>
+}
+
+<ul>
+  @for (item of items; track item.id) {
+    <app-item-card [item]=item (toggle)="toggleItem($event)" (delete)="deleteItem($event)"></app-item-card>
+  }
+</ul>
