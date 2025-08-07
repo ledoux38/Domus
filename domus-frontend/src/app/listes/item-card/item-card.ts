@@ -5,6 +5,7 @@ import {Item} from '../../models/interfaces';
   selector: 'app-item-card',
   imports: [],
   templateUrl: './item-card.html',
+  standalone: true,
   styleUrl: './item-card.css'
 })
 export class ItemCard {
@@ -12,13 +13,11 @@ export class ItemCard {
   @Output() toggle = new EventEmitter<number>();
   @Output() delete = new EventEmitter<number>();
 
-  deleteCard(id: number) {
-    if (confirm(`Supprimer l'élément ?`)) {
-      this.delete.emit(id);
-    }
+  deleteCard() {
+      this.delete.emit(this.item.id);
   }
 
-  toggleCard(id: number) {
-    this.toggle.emit(id);
+  toggleCard() {
+    this.toggle.emit(this.item.id);
   }
 }
