@@ -21,7 +21,7 @@ export class ItemService {
     return this.http.patch<Item>(`${this.apiUrl}/items/${item_id}/toggle`, {});
   }
 
-  deleteItem(item_id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/items/${item_id}`);
+  deleteItem(item_id: number): Observable<Item|null> {
+    return this.http.delete<Item|null>(`${this.apiUrl}/items/${item_id}`);
   }
 }

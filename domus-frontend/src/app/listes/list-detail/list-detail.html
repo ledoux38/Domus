@@ -9,7 +9,6 @@
   @for (item of items; track item.id) {
     <app-item-card
       [item]=item
-      (toggle)="toggleItem($event)"
       (delete)="deleteItem($event)">
     </app-item-card>
   }

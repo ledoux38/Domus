@@ -1,5 +1,6 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {Item} from '../../models/interfaces';
+import {ItemService} from '../../core/services/item-service';
 
 @Component({
   selector: 'app-item-card',
@@ -10,14 +11,27 @@ import {Item} from '../../models/interfaces';
 })
 export class ItemCard {
   @Input() item!: Item;
-  @Output() toggle = new EventEmitter<number>();
   @Output() delete = new EventEmitter<number>();
 
-  deleteCard() {
-      this.delete.emit(this.item.id);
+  constructor(private itemService: ItemService, private cdr: ChangeDetectorRef) {
   }
 
-  toggleCard() {
-    this.toggle.emit(this.item.id);
+  deleteItem() {
+    this.itemService.deleteItem(this.item.id).subscribe((item) => {
+      if(item){
+        this.item = item;
+        this.cdr.detectChanges();
+      } else {
+        this.delete.emit(this.item.id);
+      }
+    });
+  }
+
+  toggle() {
+    this.itemService.toggleItem(this.item.id).subscribe((updatedItem) => {
+        this.item.done = updatedItem.done;
+        this.cdr.detectChanges();
+      }
+    );
   }
 }

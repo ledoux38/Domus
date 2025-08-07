@@ -4,6 +4,7 @@ from .utils import serialize_list, serialize_item, get_or_create_tags, serialize
 
 bp = Blueprint('main', __name__)
 
+
 # ------------------ ROUTES API JSON ------------------
 
 @bp.route('/api/lists', methods=['GET'])
@@ -11,16 +12,25 @@ def api_get_lists():
     lists = List.query.all()
     return jsonify([serialize_list(lst) for lst in lists])
 
+
 @bp.route('/api/lists/<int:list_id>', methods=['GET'])
 def api_get_list(list_id):
     lst = List.query.get_or_404(list_id)
     return jsonify(serialize_list(lst))
+
 
 @bp.route('/api/lists/<int:list_id>/items', methods=['GET'])
 def api_get_items(list_id):
     lst = List.query.get_or_404(list_id)
     items = Item.query.filter_by(list_id=lst.id).all()
     return jsonify([serialize_item(i) for i in items])
+
+
+@bp.route('/api/lists/item/<int:item_id>', methods=['GET'])
+def api_get_item(item_id):
+    item = Item.query.get_or_404(item_id)
+    return jsonify(serialize_item(item))
+
 
 @bp.route('/api/lists', methods=['POST'])
 def api_add_list():
@@ -36,6 +46,7 @@ def api_add_list():
     db.session.commit()
     return jsonify(serialize_list(lst)), 201
 
+
 @bp.route('/api/lists/<int:list_id>', methods=['PUT'])
 def api_rename_list(list_id):
     lst = List.query.get_or_404(list_id)
@@ -47,12 +58,14 @@ def api_rename_list(list_id):
     db.session.commit()
     return jsonify(serialize_list(lst))
 
+
 @bp.route('/api/lists/<int:list_id>', methods=['DELETE'])
 def api_delete_list(list_id):
     lst = List.query.get_or_404(list_id)
     db.session.delete(lst)
     db.session.commit()
     return jsonify({'result': 'deleted'})
+
 
 # ------------------ ITEMS ------------------
 
@@ -84,12 +97,14 @@ def api_add_item(list_id):
     db.session.commit()
     return jsonify(serialize_item(item)), 201
 
+
 @bp.route('/api/lists/items/<int:item_id>/toggle', methods=['PATCH'])
 def api_toggle_item(item_id):
     item = Item.query.get_or_404(item_id)
     item.done = not item.done
     db.session.commit()
     return jsonify(serialize_item(item))
+
 
 @bp.route('/api/lists/items/<int:item_id>', methods=['DELETE'])
 def api_delete_item(item_id):
@@ -101,7 +116,8 @@ def api_delete_item(item_id):
     else:
         db.session.delete(item)
         db.session.commit()
-        return jsonify({'result': 'deleted'})
+        return jsonify(None)
+
 
 # ------------------ SUGGESTIONS ------------------
 
@@ -117,9 +133,9 @@ def api_get_suggestions(list_id):
     ).limit(5).all()
     return jsonify({'suggestions': [serialize_suggestion(s) for s in suggestions]})
 
+
 @bp.route('/api/suggestions/<tag>', methods=['DELETE'])
 def api_clear_suggestions(tag):
     Suggestion.query.filter_by(tag=tag).delete()
     db.session.commit()
     return jsonify({'result': 'cleared'})
-

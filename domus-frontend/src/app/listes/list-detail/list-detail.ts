@@ -1,9 +1,8 @@
-
 import {ActivatedRoute} from '@angular/router';
 import {ListService} from '../../core/services/list-service';
 import {ItemService} from '../../core/services/item-service';
 import {Item, List} from '../../models/interfaces';
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {ItemCard} from '../item-card/item-card';
 
 @Component({
@@ -42,22 +41,11 @@ export class ListDetail implements OnInit {
 
   loadItems() {
     this.itemService.getItems(this.listId).subscribe(data => {
-      this.items = data;
+      this.items = [...data];
     });
   }
 
-  toggleItem(item_id: number):void {
-    this.itemService.toggleItem(item_id).subscribe(updatedItem => {
-      const index = this.items.findIndex(i => i.id === updatedItem.id);
-      if (index !== -1) {
-        this.items[index] = updatedItem;
-      }
-    });
-  }
-
-  deleteItem(item_id: number):void {
-    this.itemService.deleteItem(item_id).subscribe(() => {
-      this.loadItems()
-    });
+  deleteItem(item_id ?: number) {
+    this.items = this.items.filter(item => item.id !== item_id);
   }
 }

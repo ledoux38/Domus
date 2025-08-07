@@ -1,5 +1,5 @@
 <li>
   {{item.text}} <strong>x{{item.quantity}}</strong>
-  <button (click)="toggleCard()">{{item.done ? '✅' : '⬜️'}}</button>
-  <button (click)="deleteCard()">🗑️</button>
+  <button (click)="toggle()">{{item.done ? '✅' : '⬜️'}}</button>
+  <button (click)="deleteItem()">🗑️</button>
 </li>
