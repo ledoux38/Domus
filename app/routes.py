@@ -73,27 +73,37 @@ def api_delete_list(list_id):
 def api_add_item(list_id):
     lst = List.query.get_or_404(list_id)
     data = request.get_json()
-    text = data.get('text')
+    text = (data.get('text') or '').strip()
     if not text:
         return jsonify({'error': 'Missing text'}), 400
-    tag = lst.tag
-    # 1. Cherche la suggestion existante pour ce texte/tag
+
+    # 1) Chercher (texte insensible à la casse)
     suggestion = Suggestion.query.filter(
-        db.func.lower(Suggestion.text) == text.lower(),
-        Suggestion.tag == tag
+        db.func.lower(Suggestion.text) == text.lower()
     ).first()
-    # 2. Si non trouvée, crée la suggestion
+
+    # 2) Créer si absente
     if not suggestion:
-        suggestion = Suggestion(text=text, tag=tag)
+        suggestion = Suggestion(text=text)
         db.session.add(suggestion)
-        db.session.commit()
-    # 3. Cherche si déjà dans la liste (association existante)
+        db.session.flush()
+
+    # 3) S'assurer que les tags de la liste sont liés à la suggestion
+    list_tags = lst.tags or []
+    for t in list_tags:
+        if t not in suggestion.tags:
+            suggestion.tags.append(t)
+
+    db.session.flush()
+
+    # 4) Lier/mettre à jour l'Item
     item = Item.query.filter_by(list_id=list_id, suggestion_id=suggestion.id).first()
     if item:
         item.quantity += 1
     else:
         item = Item(list_id=list_id, suggestion_id=suggestion.id, quantity=1)
         db.session.add(item)
+
     db.session.commit()
     return jsonify(serialize_item(item)), 201
 
@@ -123,19 +133,52 @@ def api_delete_item(item_id):
 
 @bp.route('/api/lists/<int:list_id>/suggestions', methods=['GET'])
 def api_get_suggestions(list_id):
-    q = request.args.get('q', '')
+    from app.models import List, Suggestion, Tag  # assure-toi d'importer Tag
+    q = (request.args.get('q') or '').strip()
     lst = List.query.get_or_404(list_id)
-    tag = lst.tag
-    # recherche insensible à la casse, max 5 résultats
-    suggestions = Suggestion.query.filter(
-        Suggestion.tag == tag,
-        Suggestion.text.ilike(f'%{q}%')
-    ).limit(5).all()
+
+    # aucun tag sur la liste => pas de suggestions contextuelles
+    if not lst.tags:
+        suggestions = (Suggestion.query
+                       .filter(Suggestion.text.ilike(f'%{q}%'))  # marche SQLite/Postgres
+                       .order_by(Suggestion.text.asc())
+                       .limit(5)
+                       .all())
+        return jsonify({'suggestions': [serialize_suggestion(s) for s in suggestions]})
+
+    list_tag_ids = [t.id for t in lst.tags]
+
+    suggestions = (Suggestion.query
+                   .filter(Suggestion.text.ilike(f'%{q}%'))
+                   .filter(Suggestion.tags.any(Tag.id.in_(list_tag_ids)))  # <-- clé
+                   .distinct()
+                   .order_by(Suggestion.text.asc())
+                   .limit(5)
+                   .all())
+
     return jsonify({'suggestions': [serialize_suggestion(s) for s in suggestions]})
 
 
 @bp.route('/api/suggestions/<tag>', methods=['DELETE'])
 def api_clear_suggestions(tag):
-    Suggestion.query.filter_by(tag=tag).delete()
+    tag_obj = Tag.query.filter_by(name=tag).first()
+    if not tag_obj:
+        return jsonify({'result': 'nothing_to_clear'}), 200
+
+    # Détacher ce tag de toutes les suggestions
+    for s in list(tag_obj.suggestions):
+        s.tags.remove(tag_obj)
+
+    db.session.flush()
+
+    # Supprimer les suggestions orphelines (aucun tag et aucun item lié)
+    orphans = (Suggestion.query
+               .outerjoin(Item, Item.suggestion_id == Suggestion.id)
+               .filter(~Suggestion.tags.any())
+               .filter(Item.id.is_(None))
+               .all())
+    for s in orphans:
+        db.session.delete(s)
+
     db.session.commit()
     return jsonify({'result': 'cleared'})

@@ -1,7 +1,7 @@
-import {Observable} from 'rxjs';
+import {Observable, map} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {Item} from '../../models/interfaces';
+import {Item, Suggestion} from '../../models/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,15 @@ export class ItemService {
 
   getItems(listId: number): Observable<Item[]> {
     return this.http.get<Item[]>(`${this.apiUrl}/${listId}/items`);
+  }
+
+  addItem(listId: number, text: string): Observable<Item> {
+    return this.http.post<Item>(`${this.apiUrl}/${listId}/items`, {text});
+  }
+
+  searchSuggestions(listId: number, q: string): Observable<Suggestion[]> {
+    return this.http.get<{suggestions: Suggestion[]}>(`${this.apiUrl}/${listId}/suggestions`, {params: {q}})
+      .pipe(map(res => res.suggestions));
   }
 
   toggleItem(item_id: number): Observable<Item> {
