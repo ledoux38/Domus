@@ -1,0 +1,4 @@
+<form #addForm="ngForm" (submit)="addItem(addForm);">
+  <input type="text" [(ngModel)]="item" name="name" placeholder="suggestion" required>
+  <button type="submit">Ajouter</button>
+</form>

@@ -40,5 +40,5 @@ def serialize_suggestion(suggestion):
     return {
         "id": suggestion.id,
         "text": suggestion.text,
-        "tag": suggestion.tag
+        "tags": [t.name for t in suggestion.tags]
     }
