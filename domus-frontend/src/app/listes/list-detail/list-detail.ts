@@ -5,12 +5,14 @@ import {Item, List, Suggestion} from '../../models/interfaces';
 import {Component, OnInit} from '@angular/core';
 import {ItemCard} from '../item-card/item-card';
 import {FormsModule, NgForm} from '@angular/forms';
+import {AddItemForm} from '../add-item-form/add-item-form';
 
 @Component({
   selector: 'app-list-detail',
   imports: [
     ItemCard,
-    FormsModule
+    FormsModule,
+    AddItemForm
   ],
   templateUrl: './list-detail.html',
   standalone: true,
@@ -20,8 +22,6 @@ export class ListDetail implements OnInit {
   listId: number = 0;
   list: List | null = null;
   items: Item[] = [];
-  newItemText: string = '';
-  suggestions: Suggestion[] = [];
 
 
   constructor(private route: ActivatedRoute,
@@ -46,30 +46,6 @@ export class ListDetail implements OnInit {
   loadItems() {
     this.itemService.getItems(this.listId).subscribe(data => {
       this.items = [...data];
-    });
-  }
-
-  addItem(form: NgForm) {
-    const text = this.newItemText.trim();
-    if (!text) {
-      return;
-    }
-    this.itemService.addItem(this.listId, text).subscribe(item => {
-      this.items.push(item);
-      form.resetForm();
-      this.newItemText = '';
-      this.suggestions = [];
-    });
-  }
-
-  searchSuggestions() {
-    const q = this.newItemText.trim();
-    if (!q) {
-      this.suggestions = [];
-      return;
-    }
-    this.itemService.searchSuggestions(this.listId, q).subscribe(data => {
-      this.suggestions = data;
     });
   }
 

@@ -4,7 +4,7 @@
   <h2>{{ list.name }}</h2>
   <small>[{{ list.tags.length ? list.tags.join(',') : 'Aucun tag' }}]</small>
 }
-
+<app-add-item-form [listId]=this.listId></app-add-item-form>
 <ul>
   @for (item of items; track item.id) {
     <app-item-card
@@ -14,18 +14,4 @@
   }
 </ul>
 
-<form #itemForm="ngForm" (ngSubmit)="addItem(itemForm)">
-  <input type="text"
-         id="item-input"
-         name="item"
-         [(ngModel)]="newItemText"
-         (input)="searchSuggestions()"
-         list="item-suggestions"
-         placeholder="Ajouter un item">
-  <datalist id="item-suggestions">
-    @for (s of suggestions; track s.id) {
-      <option [value]="s.text"></option>
-    }
-  </datalist>
-  <button type="submit">Ajouter</button>
-</form>
+

@@ -1,4 +1,15 @@
-<form #addForm="ngForm" (submit)="addItem(addForm);">
-  <input type="text" [(ngModel)]="item" name="name" placeholder="suggestion" required>
+<form #itemForm="ngForm" (ngSubmit)="addItem(itemForm)">
+  <input type="text"
+         id="item-input"
+         name="item"
+         [(ngModel)]="newItemText"
+         (input)="searchSuggestions()"
+         list="item-suggestions"
+         placeholder="Ajouter un item">
+  <datalist id="item-suggestions">
+    @for (s of suggestions; track s.id) {
+      <option [value]="s.text"></option>
+    }
+  </datalist>
   <button type="submit">Ajouter</button>
 </form>
