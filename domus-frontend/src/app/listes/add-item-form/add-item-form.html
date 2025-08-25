@@ -4,6 +4,7 @@
          name="item"
          [(ngModel)]="newItemText"
          (input)="searchSuggestions()"
+         (change)="maybeAddSuggestion()"
          list="item-suggestions"
          placeholder="Ajouter un item">
   <datalist id="item-suggestions">

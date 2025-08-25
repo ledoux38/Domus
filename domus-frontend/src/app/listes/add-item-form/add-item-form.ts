@@ -46,4 +46,15 @@ export class AddItemForm {
       this.suggestions = data;
     });
   }
+
+  maybeAddSuggestion() {
+    const text = this.newItemText.trim();
+    const match = this.suggestions.find(s => s.text.toLowerCase() === text.toLowerCase());
+    if (match) {
+      this.itemService.addItem(this.listId, match.text).subscribe(() => {
+        this.newItemText = '';
+        this.suggestions = [];
+      });
+    }
+  }
 }
