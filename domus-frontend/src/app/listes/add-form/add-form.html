@@ -1,0 +1,21 @@
+<form #f="ngForm" (ngSubmit)="submit(f)">
+  @if (context === 'item') {
+    <input type="text"
+           id="item-input"
+           name="item"
+           [(ngModel)]="newItemText"
+           (input)="searchSuggestions()"
+           (change)="maybeAddSuggestion()"
+           list="item-suggestions"
+           placeholder="Ajouter un item">
+    <datalist id="item-suggestions">
+      @for (s of suggestions; track s.id) {
+        <option [value]="s.text"></option>
+      }
+    </datalist>
+  } @else {
+    <input type="text" [(ngModel)]="newName" name="name" placeholder="Nom de la liste">
+    <input type="text" [(ngModel)]="newTag" name="tag" placeholder="Tag (ex: course, été)">
+  }
+  <button type="submit">Ajouter</button>
+</form>

@@ -4,7 +4,7 @@
   <h2>{{ list.name }}</h2>
   <small>[{{ list.tags.length ? list.tags.join(',') : 'Aucun tag' }}]</small>
 }
-<app-add-item-form [listId]=this.listId></app-add-item-form>
+<app-add-form [context]="'item'" [listId]="this.listId"></app-add-form>
 <ul>
   @for (item of items; track item.id) {
     <app-item-card

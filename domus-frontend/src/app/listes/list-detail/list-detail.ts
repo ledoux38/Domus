@@ -5,14 +5,14 @@ import {Item, List, Suggestion} from '../../models/interfaces';
 import {Component, OnInit} from '@angular/core';
 import {ItemCard} from '../item-card/item-card';
 import {FormsModule, NgForm} from '@angular/forms';
-import {AddItemForm} from '../add-item-form/add-item-form';
+import {AddForm} from '../add-form/add-form';
 
 @Component({
   selector: 'app-list-detail',
   imports: [
     ItemCard,
     FormsModule,
-    AddItemForm
+    AddForm
   ],
   templateUrl: './list-detail.html',
   standalone: true,
