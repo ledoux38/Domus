@@ -1,5 +1,5 @@
 <h2>Mes listes</h2>
-<app-add-list-form (add)="addList($event)"></app-add-list-form>
+<app-add-form [context]="'list'" (add)="addList($event)"></app-add-form>
 <ul>
   @for (list of lists; track list.id) {
     <app-list-card (delete)="deleteList($event)" [list]="list"></app-list-card>

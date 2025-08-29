@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {ChangeDetectorRef} from '@angular/core';
-import {AddListForm} from './add-list-form/add-list-form';
+import {AddForm} from './add-form/add-form';
 import {ListService} from '../core/services/list-service';
 import {List} from '../models/interfaces';
 import {ListCard} from './list-card/list-card';
@@ -10,7 +10,7 @@ import {ListCard} from './list-card/list-card';
   selector: 'app-listes',
   imports: [
     FormsModule,
-    AddListForm,
+    AddForm,
     ListCard
   ],
   templateUrl: './listes.html',
