@@ -192,3 +192,16 @@ def api_clear_suggestions(tag):
 
     db.session.commit()
     return jsonify({'result': 'cleared'})
+
+
+@bp.route('/api/tags/suggestions', methods=['GET'])
+def api_tag_suggestions():
+    q = (request.args.get('q') or '').strip()
+    if not q:
+        return jsonify({'suggestions': []})
+    tags = (Tag.query
+            .filter(Tag.name.ilike(f'%{q}%'))
+            .order_by(Tag.name.asc())
+            .limit(5)
+            .all())
+    return jsonify({'suggestions': [t.name for t in tags]})

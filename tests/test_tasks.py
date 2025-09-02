@@ -127,3 +127,12 @@ def test_suggestions_search(client):
     assert len(data['suggestions']) <= 5
     assert all('groceries' in s['tags'] for s in data['suggestions'])
     assert any('a' in s['text'].lower() for s in data['suggestions'])
+
+
+def test_tag_suggestions_api(client):
+    client.post('/list/new', data={'name': 'Courses', 'tags': 'groceries'}, follow_redirects=True)
+    client.post('/list/new', data={'name': 'Travail', 'tags': 'bureau'}, follow_redirects=True)
+    response = client.get('/api/tags/suggestions?q=gro')
+    data = response.get_json()
+    assert 'suggestions' in data
+    assert 'groceries' in data['suggestions']

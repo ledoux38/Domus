@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {FormsModule, NgForm} from '@angular/forms';
 import {Suggestion} from '../../models/interfaces';
 import {ItemService} from '../../core/services/item-service';
+import {TagService} from '../../core/services/tag-service';
 
 @Component({
   selector: 'app-add-form',
@@ -18,10 +19,10 @@ export class AddForm {
   newItemText: string = '';
   suggestions: Suggestion[] = [];
   newName: string = '';
-  newTag: string = '';
-  suggestionTag: string = '';
+  tagInput: string = '';
+  tagSuggestions: string[] = [];
 
-  constructor(private itemService: ItemService) {}
+  constructor(private itemService: ItemService, private tagService: TagService) {}
 
   submit(form: NgForm) {
     if (this.context === 'item') {
@@ -32,30 +33,39 @@ export class AddForm {
       this.itemService.addItem(this.listId, text).subscribe(() => {
         form.resetForm();
         this.newItemText = '';
-        this.suggestionTag = '';
         this.suggestions = [];
       });
     } else {
-      if (this.newName.trim()) {
-        this.add.emit({name: this.newName, tag: this.newTag || 'indefinie'});
-        form.resetForm();
+      const name = this.newName.trim();
+      if (!name) {
+        return;
       }
+      this.add.emit({name, tag: this.tagInput || 'indefinie'});
+      form.resetForm();
+      this.tagSuggestions = [];
     }
   }
 
   searchSuggestions() {
-    if (this.context !== 'item') {
-      return;
+    if (this.context === 'item') {
+      const q = this.newItemText.trim();
+      if (!q) {
+        this.suggestions = [];
+        return;
+      }
+      this.itemService.searchSuggestions(this.listId, q).subscribe(data => {
+        this.suggestions = data;
+      });
+    } else {
+      const q = this.tagInput.trim();
+      if (!q) {
+        this.tagSuggestions = [];
+        return;
+      }
+      this.tagService.searchSuggestions(q).subscribe(data => {
+        this.tagSuggestions = data;
+      });
     }
-    const q = this.newItemText.trim();
-    const tag = this.suggestionTag.trim();
-    if (!q) {
-      this.suggestions = [];
-      return;
-    }
-    this.itemService.searchSuggestions(this.listId, q, tag).subscribe(data => {
-      this.suggestions = data;
-    });
   }
 
   maybeAddSuggestion() {
