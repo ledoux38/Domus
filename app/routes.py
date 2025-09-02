@@ -135,7 +135,17 @@ def api_delete_item(item_id):
 def api_get_suggestions(list_id):
     from app.models import List, Suggestion, Tag  # assure-toi d'importer Tag
     q = (request.args.get('q') or '').strip()
+    tag_param = (request.args.get('tag') or '').strip()
     lst = List.query.get_or_404(list_id)
+
+    if tag_param:
+        suggestions = (Suggestion.query
+                       .filter(Suggestion.text.ilike(f'%{q}%'))
+                       .filter(Suggestion.tags.any(Tag.name == tag_param))
+                       .order_by(Suggestion.text.asc())
+                       .limit(5)
+                       .all())
+        return jsonify({'suggestions': [serialize_suggestion(s) for s in suggestions]})
 
     # aucun tag sur la liste => pas de suggestions contextuelles
     if not lst.tags:

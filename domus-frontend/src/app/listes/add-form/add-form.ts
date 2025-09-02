@@ -19,6 +19,7 @@ export class AddForm {
   suggestions: Suggestion[] = [];
   newName: string = '';
   newTag: string = '';
+  suggestionTag: string = '';
 
   constructor(private itemService: ItemService) {}
 
@@ -31,6 +32,7 @@ export class AddForm {
       this.itemService.addItem(this.listId, text).subscribe(() => {
         form.resetForm();
         this.newItemText = '';
+        this.suggestionTag = '';
         this.suggestions = [];
       });
     } else {
@@ -46,11 +48,12 @@ export class AddForm {
       return;
     }
     const q = this.newItemText.trim();
+    const tag = this.suggestionTag.trim();
     if (!q) {
       this.suggestions = [];
       return;
     }
-    this.itemService.searchSuggestions(this.listId, q).subscribe(data => {
+    this.itemService.searchSuggestions(this.listId, q, tag).subscribe(data => {
       this.suggestions = data;
     });
   }
