@@ -21,8 +21,12 @@ export class ItemService {
     return this.http.post<Item>(`${this.apiUrl}/${listId}/items`, {text});
   }
 
-  searchSuggestions(listId: number, q: string): Observable<Suggestion[]> {
-    return this.http.get<{suggestions: Suggestion[]}>(`${this.apiUrl}/${listId}/suggestions`, {params: {q}})
+  searchSuggestions(listId: number, q: string, tag?: string): Observable<Suggestion[]> {
+    const params: any = {q};
+    if (tag) {
+      params.tag = tag;
+    }
+    return this.http.get<{suggestions: Suggestion[]}>(`${this.apiUrl}/${listId}/suggestions`, {params})
       .pipe(map(res => res.suggestions));
   }
 

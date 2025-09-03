@@ -120,9 +120,19 @@ def test_suggestions_search(client):
     lst = get_list_by_name_and_tag('Courses', 'groceries')
     for text in ['Lait', 'Oeufs', 'Bacon', 'Jambon', 'Beurre', 'Pain']:
         client.post(f'/lists/{lst.id}/add_item', data={'text': text}, follow_redirects=True)
-    # Recherche suggestions avec "a" (doit retourner max 5 résultats)
-    response = client.get(f'/lists/{lst.id}/suggestions?q=a')
+    # Recherche suggestions avec "a" et filtrage par tag "groceries" (max 5 résultats)
+    response = client.get(f'/lists/{lst.id}/suggestions?q=a&tag=groceries')
     data = response.get_json()
     assert 'suggestions' in data
     assert len(data['suggestions']) <= 5
-    assert any('a' in s.lower() for s in data['suggestions'])
+    assert all('groceries' in s['tags'] for s in data['suggestions'])
+    assert any('a' in s['text'].lower() for s in data['suggestions'])
+
+
+def test_tag_suggestions_api(client):
+    client.post('/list/new', data={'name': 'Courses', 'tags': 'groceries'}, follow_redirects=True)
+    client.post('/list/new', data={'name': 'Travail', 'tags': 'bureau'}, follow_redirects=True)
+    response = client.get('/api/tags/suggestions?q=gro')
+    data = response.get_json()
+    assert 'suggestions' in data
+    assert 'groceries' in data['suggestions']
