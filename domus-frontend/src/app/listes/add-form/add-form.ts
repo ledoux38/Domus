@@ -1,8 +1,12 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, computed, signal} from '@angular/core';
 import {FormsModule, NgForm} from '@angular/forms';
 import {Suggestion} from '../../models/interfaces';
 import {ItemService} from '../../core/services/item-service';
 import {TagService} from '../../core/services/tag-service';
+
+type SuggestionsResult =
+  | { kind: 'item'; values: Suggestion[] }
+  | { kind: 'tag'; values: string[] };
 
 @Component({
   selector: 'app-add-form',
@@ -12,15 +16,30 @@ import {TagService} from '../../core/services/tag-service';
   styleUrl: './add-form.css'
 })
 export class AddForm {
-  @Input() context: 'item' | 'list' = 'item';
+  private readonly contextSignal = signal<'item' | 'list'>('item');
+  private readonly itemSuggestionsSignal = signal<Suggestion[]>([]);
+  private readonly tagSuggestionsSignal = signal<string[]>([]);
+
+  protected readonly suggestions = computed<SuggestionsResult>(() =>
+    this.contextSignal() === 'item'
+      ? {kind: 'item', values: this.itemSuggestionsSignal()}
+      : {kind: 'tag', values: this.tagSuggestionsSignal()}
+  );
+
+  @Input()
+  set context(value: 'item' | 'list' | undefined) {
+    this.contextSignal.set(value ?? 'item');
+  }
+
+  get context(): 'item' | 'list' {
+    return this.contextSignal();
+  }
   @Input() listId: number = 0;
   @Output() add = new EventEmitter<{ name: string; tag: string }>();
 
   newItemText: string = '';
-  suggestions: Suggestion[] = [];
   newName: string = '';
   tagInput: string = '';
-  tagSuggestions: string[] = [];
 
   constructor(private itemService: ItemService, private tagService: TagService) {}
 
@@ -33,7 +52,7 @@ export class AddForm {
       this.itemService.addItem(this.listId, text).subscribe(() => {
         form.resetForm();
         this.newItemText = '';
-        this.suggestions = [];
+        this.itemSuggestionsSignal.set([]);
       });
     } else {
       const name = this.newName.trim();
@@ -42,7 +61,7 @@ export class AddForm {
       }
       this.add.emit({name, tag: this.tagInput || 'indefinie'});
       form.resetForm();
-      this.tagSuggestions = [];
+      this.tagSuggestionsSignal.set([]);
     }
   }
 
@@ -50,20 +69,20 @@ export class AddForm {
     if (this.context === 'item') {
       const q = this.newItemText.trim();
       if (!q) {
-        this.suggestions = [];
+        this.itemSuggestionsSignal.set([]);
         return;
       }
       this.itemService.searchSuggestions(this.listId, q).subscribe(data => {
-        this.suggestions = data;
+        this.itemSuggestionsSignal.set(data);
       });
     } else {
       const q = this.tagInput.trim();
       if (!q) {
-        this.tagSuggestions = [];
+        this.tagSuggestionsSignal.set([]);
         return;
       }
       this.tagService.searchSuggestions(q).subscribe(data => {
-        this.tagSuggestions = data;
+        this.tagSuggestionsSignal.set(data);
       });
     }
   }
@@ -73,11 +92,11 @@ export class AddForm {
       return;
     }
     const text = this.newItemText.trim();
-    const match = this.suggestions.find(s => s.text.toLowerCase() === text.toLowerCase());
+    const match = this.itemSuggestionsSignal().find(s => s.text.toLowerCase() === text.toLowerCase());
     if (match) {
       this.itemService.addItem(this.listId, match.text).subscribe(() => {
         this.newItemText = '';
-        this.suggestions = [];
+        this.itemSuggestionsSignal.set([]);
       });
     }
   }
