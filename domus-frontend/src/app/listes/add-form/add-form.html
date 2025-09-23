@@ -9,8 +9,11 @@
            list="item-suggestions"
            placeholder="Ajouter un item">
     <datalist id="item-suggestions">
-      @for (s of suggestions; track s.id) {
-        <option [value]="s.text"></option>
+      @let suggestionList = suggestions();
+      @if (suggestionList.kind === 'item') {
+        @for (s of suggestionList.values; track s.id) {
+          <option [value]="s.text"></option>
+        }
       }
     </datalist>
   } @else {
@@ -22,8 +25,11 @@
            list="tag-suggestions"
            placeholder="Tag (ex: course, été)">
     <datalist id="tag-suggestions">
-      @for (t of tagSuggestions; track t) {
-        <option [value]="t"></option>
+      @let tagSuggestionList = suggestions();
+      @if (tagSuggestionList.kind === 'tag') {
+        @for (t of tagSuggestionList.values; track t) {
+          <option [value]="t"></option>
+        }
       }
     </datalist>
   }
